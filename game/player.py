@@ -7,19 +7,19 @@ class Player:
         self.screen_height = screen_height
         self.width = 44
         self.height = 54
-        self.speed = 420  # pixels per second
+        self.speed = 7
 
         self.x = (screen_width // 2) - (self.width // 2)
         self.y = screen_height - self.height - 20
 
-    def move_left(self, dt):
-        self.x -= self.speed * dt
+    def move_left(self):
+        self.x -= self.speed
 
-    def move_right(self, dt):
-        self.x += self.speed * dt
+    def move_right(self):
+        self.x += self.speed
 
     def update(self):
-        self.x = max(0, min(self.x, self.screen_width - self.width))
+        pass
 
     @property
     def rect(self):

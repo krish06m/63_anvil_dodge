@@ -3,7 +3,6 @@ from game.game_engine import GameEngine
 
 WIDTH, HEIGHT = 700, 500
 FPS = 60
-MAX_DT = 0.05  # cap frame time so a stalled window doesn't teleport objects
 
 
 def main():
@@ -16,17 +15,16 @@ def main():
 
     running = True
     while running:
-        dt = min(clock.tick(FPS) / 1000, MAX_DT)
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             engine.handle_event(event)
 
-        engine.update(dt)
+        engine.update()
         engine.render(screen)
 
         pygame.display.flip()
+        clock.tick(FPS)
 
     pygame.quit()
 

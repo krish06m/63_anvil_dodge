@@ -7,14 +7,13 @@ class GameEngine:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.ground_y = height - 20
         self.player = Player(width, height)
         self.anvils = []
 
-        self.spawn_delay = 0.7  # seconds
-        self.spawn_timer = 0.0
+        self.spawn_delay = 700
+        self.last_spawn_time = pygame.time.get_ticks()
 
-        self.elapsed_time = 0.0
+        self.start_ticks = pygame.time.get_ticks()
         self.survival_time = 0
         self.game_state = "PLAYING"
 
@@ -27,50 +26,49 @@ class GameEngine:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.reset()
 
-    def update(self, dt):
+    def update(self):
         if self.game_state != "PLAYING":
             return
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.player.move_left(dt)
+            self.player.move_left()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.player.move_right(dt)
+            self.player.move_right()
 
         self.player.update()
 
-        self.elapsed_time += dt
-        self.survival_time = int(self.elapsed_time)
+        self.survival_time = (pygame.time.get_ticks() - self.start_ticks) // 1000
 
-        self.spawn_timer += dt
-        if self.spawn_timer >= self.spawn_delay:
+        now = pygame.time.get_ticks()
+        if now - self.last_spawn_time >= self.spawn_delay:
             self.anvils.append(Anvil(self.width))
-            self.spawn_timer -= self.spawn_delay
+            self.last_spawn_time = now
 
         player_rect = self.player.rect
         for anvil in self.anvils[:]:
-            anvil.update(dt)
+            anvil.update()
 
             if player_rect.colliderect(anvil.rect):
                 self.game_state = "GAME_OVER"
-                break
 
-            if anvil.has_hit_ground(self.ground_y):
+            if anvil.is_off_screen(self.height):
                 self.anvils.remove(anvil)
 
     def reset(self):
         self.player = Player(self.width, self.height)
         self.anvils.clear()
-        self.spawn_timer = 0.0
-        self.elapsed_time = 0.0
+        self.start_ticks = pygame.time.get_ticks()
+        self.last_spawn_time = pygame.time.get_ticks()
         self.survival_time = 0
         self.game_state = "PLAYING"
 
     def render(self, screen):
         screen.fill((35, 38, 45))
 
-        pygame.draw.rect(screen, (70, 75, 85), (0, self.ground_y, self.width, self.height - self.ground_y))
-        pygame.draw.line(screen, (160, 90, 40), (0, self.ground_y), (self.width, self.ground_y), 3)
+        ground_y = self.height - 20
+        pygame.draw.rect(screen, (70, 75, 85), (0, ground_y, self.width, 20))
+        pygame.draw.line(screen, (160, 90, 40), (0, ground_y), (self.width, ground_y), 3)
 
         self.player.render(screen)
         for anvil in self.anvils:

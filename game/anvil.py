@@ -9,13 +9,13 @@ class Anvil:
         self.height = 32
         self.x = random.randint(20, screen_width - self.width - 20)
         self.y = -self.height
-        self.speed = random.uniform(4.5, 7.0)
+        self.speed = random.uniform(270, 420)  # pixels per second
 
-    def update(self):
-        self.y += self.speed
+    def update(self, dt):
+        self.y += self.speed * dt
 
-    def is_off_screen(self, screen_height):
-        return self.y > screen_height + 10
+    def has_hit_ground(self, ground_y):
+        return self.y + self.height >= ground_y
 
     @property
     def rect(self):
